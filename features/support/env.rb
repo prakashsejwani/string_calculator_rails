@@ -6,6 +6,7 @@
 
 
 require 'cucumber/rails'
+require 'selenium/webdriver'
 
 # By default, any exception happening in your Rails application will bubble up
 # to Cucumber so that your scenario will fail. This is a different from how
@@ -51,3 +52,13 @@ end
 # The :transaction strategy is faster, but might give you threading problems.
 # See https://github.com/cucumber/cucumber-rails/blob/master/features/choose_javascript_database_strategy.feature
 Cucumber::Rails::Database.javascript_strategy = :truncation
+
+Capybara.default_max_wait_time = 3
+
+Capybara.register_driver :headless_chrome do |app|
+  chrome_options = Selenium::WebDriver::Chrome::Options.new
+  %w[headless=new disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,900].each { |arg| chrome_options.add_argument(arg) }
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: chrome_options)
+end
+
+Capybara.javascript_driver = :headless_chrome
