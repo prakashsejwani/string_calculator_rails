@@ -11,7 +11,7 @@ class StringCalculator
   DEFAULT_DELIMITERS = /[,\n]/.freeze
 
   def add(numbers)
-    return 0 if numbers == ''
+    return 0 if numbers == ""
     return numbers.to_i if numbers !~ DEFAULT_DELIMITERS
     numbers.split(DEFAULT_DELIMITERS).map(&:to_i).sum
   end
