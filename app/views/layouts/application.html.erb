@@ -22,6 +22,62 @@
   </head>
 
   <body>
+    <div id="root"></div>
     <%= yield %>
+    <script type="module">
+      import React, { useState } from 'https://cdn.skypack.dev/react@18.2.0';
+      import { createRoot } from 'https://cdn.skypack.dev/react-dom@18.2.0/client';
+
+      function App() {
+        const [input, setInput] = useState('');
+        const [result, setResult] = useState(null);
+        const [error, setError] = useState(null);
+
+        async function handleSubmit(e) {
+          e.preventDefault();
+          setResult(null);
+          setError(null);
+          const res = await fetch('/string_calculators', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ numbers: input })
+          });
+          const json = await res.json();
+          if (res.ok) {
+            setResult(json.result);
+          } else {
+            setError(json.error || 'Error');
+          }
+        }
+
+        return (
+          React.createElement('div', { style: { maxWidth: '640px', margin: '40px auto', fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif' } },
+            React.createElement('h1', null, 'String Calculator'),
+            React.createElement('form', { onSubmit: handleSubmit },
+              React.createElement('label', { htmlFor: 'numbers' }, 'Enter numbers string'),
+              React.createElement('textarea', {
+                id: 'numbers',
+                rows: 4,
+                style: { width: '100%', marginTop: '8px' },
+                value: input,
+                onChange: e => setInput(e.target.value),
+                placeholder: 'Examples: 1,2 or 1\\n2,3 or //[***]\\n1***2***3'
+              }),
+              React.createElement('div', { style: { marginTop: '12px' } },
+                React.createElement('button', { type: 'submit' }, 'Calculate')
+              )
+            ),
+            result !== null && React.createElement('p', { style: { color: 'green' } }, `Result: ${result}`),
+            error && React.createElement('p', { style: { color: 'crimson' } }, error)
+          )
+        );
+      }
+
+      const root = createRoot(document.getElementById('root'));
+      root.render(React.createElement(App));
+    </script>
   </body>
 </html>
