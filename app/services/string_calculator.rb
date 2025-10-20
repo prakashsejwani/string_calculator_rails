@@ -8,11 +8,10 @@ end
 
 class StringCalculator
   MAX_NUMBER = 1000
-  DEFAULT_DELIMITERS = /[,
-]/.freeze
+  DEFAULT_DELIMITERS = /[,\n]/.freeze
 
   def add(numbers)
     return 0 if numbers == ''
-    0
+    numbers.to_i
   end
 end
