@@ -16,8 +16,16 @@ class StringCalculator
 
     if numbers.start_with?("//")
       header, body = numbers.split("\n", 2)
-      # Simple custom delimiter form: //;\n
-      if header[2] && header[2] != '['
+      # Prefer bracketed delimiter(s) first
+      if header.start_with?("//[")
+        delimiters = header.scan(/\[(.*?)\]/).flatten
+        pattern = Regexp.union(delimiters)
+        values = body.split(pattern).map(&:to_i).reject { |n| n > MAX_NUMBER }
+        negatives = values.select { |n| n < 0 }
+        raise NegativeNumbersError, negatives if negatives.any?
+        return values.sum
+      else
+        # Simple custom delimiter form: //;\n
         custom_delimiter = header[2]
         values = body.split(custom_delimiter).map(&:to_i).reject { |n| n > MAX_NUMBER }
         negatives = values.select { |n| n < 0 }
