@@ -12,6 +12,7 @@ class StringCalculator
 
   def add(numbers)
     return 0 if numbers == ''
-    numbers.to_i
+    return numbers.to_i if numbers !~ DEFAULT_DELIMITERS
+    numbers.split(DEFAULT_DELIMITERS).map(&:to_i).sum
   end
 end
