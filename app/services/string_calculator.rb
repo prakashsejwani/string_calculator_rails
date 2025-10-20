@@ -19,14 +19,14 @@ class StringCalculator
       # Simple custom delimiter form: //;\n
       if header[2] && header[2] != '['
         custom_delimiter = header[2]
-        values = body.split(custom_delimiter).map(&:to_i)
+        values = body.split(custom_delimiter).map(&:to_i).reject { |n| n > MAX_NUMBER }
         negatives = values.select { |n| n < 0 }
         raise NegativeNumbersError, negatives if negatives.any?
         return values.sum
       end
     end
 
-    values = numbers.split(DEFAULT_DELIMITERS).map(&:to_i)
+    values = numbers.split(DEFAULT_DELIMITERS).map(&:to_i).reject { |n| n > MAX_NUMBER }
     negatives = values.select { |n| n < 0 }
     raise NegativeNumbersError, negatives if negatives.any?
     values.sum
