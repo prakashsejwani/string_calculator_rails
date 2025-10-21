@@ -7,6 +7,8 @@ class StringCalculatorsController < ApplicationController
     render json: { result: result }
   rescue NegativeNumbersError => e
     render json: { error: e.message }, status: :unprocessable_entity
+  rescue ArgumentError => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 end
 
