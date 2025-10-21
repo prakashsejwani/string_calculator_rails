@@ -436,7 +436,7 @@ DEPENDENCIES
   rails (~> 8.0.3)
   rspec-rails (~> 8.0)
   rubocop-rails-omakase
-  selenium-webdriver
+  selenium-webdriver (~> 4.0)
   solid_cable
   solid_cache
   solid_queue
