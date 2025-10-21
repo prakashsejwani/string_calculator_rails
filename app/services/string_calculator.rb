@@ -16,6 +16,8 @@ class StringCalculator
 
     if numbers.start_with?("//")
       header, body = numbers.split("\n", 2)
+      raise ArgumentError, "Invalid custom delimiter format" if body.nil?
+      
       # Prefer bracketed delimiter(s) first
       if header.start_with?("//[")
         delimiters = header.scan(/\[(.*?)\]/).flatten
