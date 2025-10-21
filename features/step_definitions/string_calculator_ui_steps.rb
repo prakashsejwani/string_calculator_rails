@@ -2,9 +2,15 @@
 
 Given('I am on the home page') do
   visit '/'
+  # Wait for React to load
+  sleep 2
+  # Debug: print page content
+  puts "Page content: #{page.html}"
 end
 
 When('I enter {string} in the calculator') do |input|
+  # Wait for the element to be present
+  expect(page).to have_css('#numbers', wait: 10)
   # Find the textarea and fill it with the input
   find('#numbers').fill_in with: input
 end

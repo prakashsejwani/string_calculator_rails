@@ -24,9 +24,11 @@
   <body>
     <div id="root"></div>
     <%= yield %>
-    <script type="module">
-      import React, { useState } from 'https://cdn.skypack.dev/react@18.2.0';
-      import { createRoot } from 'https://cdn.skypack.dev/react-dom@18.2.0/client';
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script>
+      const { useState } = React;
+      const { createRoot } = ReactDOM;
 
       function App() {
         const [input, setInput] = useState('');
