@@ -39,19 +39,27 @@
           e.preventDefault();
           setResult(null);
           setError(null);
-          const res = await fetch('/string_calculators', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ numbers: input })
-          });
-          const json = await res.json();
-          if (res.ok) {
-            setResult(json.result);
-          } else {
-            setError(json.error || 'Error');
+          try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            const headers = {
+              'Content-Type': 'application/json'
+            };
+            if (csrfToken) {
+              headers['X-CSRF-Token'] = csrfToken.getAttribute('content');
+            }
+            const res = await fetch('/string_calculators', {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({ numbers: input })
+            });
+            const json = await res.json();
+            if (res.ok) {
+              setResult(json.result);
+            } else {
+              setError(json.error || 'Error');
+            }
+          } catch (error) {
+            setError('Network error: ' + error.message);
           }
         }
 
