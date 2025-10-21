@@ -60,3 +60,8 @@ Feature: String Calculator UI
     When I enter "1,-2,3,-4" in the calculator
     And I click "Calculate"
     Then I should see "negative numbers not allowed -2,-4"
+
+  Scenario: Malformed custom delimiter shows error
+    When I enter "//[***]" in the calculator
+    And I click "Calculate"
+    Then I should see "Invalid custom delimiter format"
