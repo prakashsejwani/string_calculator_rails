@@ -50,4 +50,3 @@ gem "rspec-rails", "~> 8.0", groups: [:development, :test]
 gem "cucumber-rails", "~> 4.0", group: :test
 
 gem "database_cleaner-active_record", "~> 2.2", group: :test
-gem "selenium-webdriver", group: :test
