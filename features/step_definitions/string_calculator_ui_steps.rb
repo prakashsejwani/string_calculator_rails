@@ -9,8 +9,10 @@ end
 When('I enter {string} in the calculator') do |input|
   # Wait for the element to be present
   expect(page).to have_css('#numbers', wait: 10)
+  # Convert literal \n to actual newlines
+  processed_input = input.gsub('\\n', "\n")
   # Find the textarea and fill it with the input
-  find('#numbers').fill_in with: input
+  find('#numbers').fill_in with: processed_input
 end
 
 When('I click {string}') do |button_text|
