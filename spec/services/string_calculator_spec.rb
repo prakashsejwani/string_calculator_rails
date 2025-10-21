@@ -60,5 +60,10 @@ RSpec.describe 'StringCalculator' do
       calculator = StringCalculator.new
       expect(calculator.add("//[**][%%%]\n1**2%%%3")).to eq(6)
     end
+
+    it 'handles malformed custom delimiter gracefully' do
+      calculator = StringCalculator.new
+      expect { calculator.add("//[***]") }.to raise_error(ArgumentError)
+    end
   end
 end
