@@ -48,6 +48,13 @@
           e.preventDefault();
           setResult(null);
           setError(null);
+          
+          const validationError = validateInput(input);
+          if (validationError) {
+            setError(validationError);
+            return;
+          }
+          
           setIsLoading(true);
           
           try {
@@ -82,16 +89,30 @@
           setError(null);
         }
 
+        function clearInput() {
+          setInput('');
+          setResult(null);
+          setError(null);
+        }
+
+        function validateInput(input) {
+          if (!input.trim()) {
+            return 'Please enter some numbers to calculate';
+          }
+          return null;
+        }
+
         return (
           React.createElement('div', { 
             style: { 
               maxWidth: '800px', 
               margin: '20px auto', 
-              padding: '20px',
+              padding: window.innerWidth < 768 ? '15px' : '20px',
               fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
               backgroundColor: '#f8f9fa',
               borderRadius: '12px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              minHeight: '100vh'
             } 
           },
             React.createElement('div', { style: { textAlign: 'center', marginBottom: '30px' } },
@@ -99,7 +120,7 @@
                 style: { 
                   color: '#2c3e50', 
                   margin: '0 0 10px 0',
-                  fontSize: '2.5rem',
+                  fontSize: window.innerWidth < 768 ? '2rem' : '2.5rem',
                   fontWeight: '700'
                 } 
               }, 'String Calculator'),
@@ -145,12 +166,36 @@
                 })
               ),
               
-              React.createElement('div', { style: { marginBottom: '20px' } },
+              React.createElement('div', { 
+                style: { 
+                  display: 'flex', 
+                  flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+                  gap: '12px', 
+                  marginBottom: '20px' 
+                } 
+              },
                 React.createElement('button', { 
                   type: 'submit',
+                  disabled: isLoading || !input.trim(),
+                  style: { 
+                    backgroundColor: isLoading || !input.trim() ? '#95a5a6' : '#3498db',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s',
+                    minWidth: '120px'
+                  }
+                }, isLoading ? 'Calculating...' : 'Calculate'),
+                React.createElement('button', { 
+                  type: 'button',
+                  onClick: clearInput,
                   disabled: isLoading,
                   style: { 
-                    backgroundColor: isLoading ? '#95a5a6' : '#3498db',
+                    backgroundColor: '#e74c3c',
                     color: 'white',
                     border: 'none',
                     padding: '12px 24px',
@@ -159,9 +204,9 @@
                     fontWeight: '600',
                     cursor: isLoading ? 'not-allowed' : 'pointer',
                     transition: 'background-color 0.2s',
-                    minWidth: '120px'
+                    minWidth: '80px'
                   }
-                }, isLoading ? 'Calculating...' : 'Calculate')
+                }, 'Clear')
               )
             ),
             
@@ -177,7 +222,9 @@
                 style: { 
                   display: 'flex', 
                   flexWrap: 'wrap', 
-                  gap: '8px' 
+                  gap: '8px',
+                  marginBottom: '15px',
+                  justifyContent: window.innerWidth < 768 ? 'center' : 'flex-start'
                 } 
               },
                 examples.map((example, index) =>
@@ -202,6 +249,39 @@
                       e.target.style.backgroundColor = '#ecf0f1';
                     }
                   }, `${example.label}: ${example.input}`)
+                )
+              ),
+              React.createElement('div', { 
+                style: { 
+                  backgroundColor: '#f8f9fa',
+                  border: '1px solid #e9ecef',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  fontSize: '14px',
+                  color: '#495057'
+                } 
+              },
+                React.createElement('h4', { 
+                  style: { 
+                    margin: '0 0 10px 0',
+                    color: '#2c3e50',
+                    fontSize: '16px'
+                  } 
+                }, 'Supported Formats:'),
+                React.createElement('ul', { 
+                  style: { 
+                    margin: '0',
+                    paddingLeft: '20px'
+                  } 
+                },
+                  React.createElement('li', null, 'Basic: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '1,2,3')),
+                  React.createElement('li', null, 'Newlines: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '1\\n2,3')),
+                  React.createElement('li', null, 'Custom delimiter: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '//;\\n1;2')),
+                  React.createElement('li', null, 'Long delimiter: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '//[***]\\n1***2***3')),
+                  React.createElement('li', null, 'Multiple delimiters: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '//[*][%]\\n1*2%3')),
+                  React.createElement('li', null, 'Empty string returns 0'),
+                  React.createElement('li', null, 'Numbers > 1000 are ignored'),
+                  React.createElement('li', null, 'Negative numbers show error with all negatives listed')
                 )
               )
             ),
@@ -241,20 +321,45 @@
                 marginBottom: '20px'
               } 
             },
-              React.createElement('h3', { 
+              React.createElement('div', { 
                 style: { 
-                  color: '#e74c3c', 
-                  margin: '0 0 8px 0',
-                  fontSize: '1.1rem'
+                  display: 'flex', 
+                  alignItems: 'center',
+                  marginBottom: '8px'
                 } 
-              }, 'Error'),
+              },
+                React.createElement('span', { 
+                  style: { 
+                    fontSize: '20px',
+                    marginRight: '8px'
+                  } 
+                }, '⚠️'),
+                React.createElement('h3', { 
+                  style: { 
+                    color: '#e74c3c', 
+                    margin: '0',
+                    fontSize: '1.1rem'
+                  } 
+                }, 'Error')
+              ),
               React.createElement('p', { 
                 style: { 
                   color: '#e74c3c', 
                   margin: '0',
-                  fontSize: '1rem'
+                  fontSize: '1rem',
+                  lineHeight: '1.4'
                 } 
-              }, error)
+              }, error),
+              error.includes('negative numbers not allowed') && React.createElement('div', { 
+                style: { 
+                  marginTop: '12px',
+                  padding: '8px',
+                  backgroundColor: '#f8d7da',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  color: '#721c24'
+                } 
+              }, '💡 Tip: Remove negative numbers from your input to calculate the sum.')
             )
           )
         );
