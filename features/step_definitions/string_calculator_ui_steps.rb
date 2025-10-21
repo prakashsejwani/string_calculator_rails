@@ -4,8 +4,6 @@ Given('I am on the home page') do
   visit '/'
   # Wait for React to load
   sleep 2
-  # Debug: print page content
-  puts "Page content: #{page.html}"
 end
 
 When('I enter {string} in the calculator') do |input|
