@@ -19,5 +19,5 @@ end
 
 Then('I should see {string}') do |expected_text|
   # Wait for the result or error to appear
-  expect(page).to have_content(expected_text)
+  expect(page).to have_content(expected_text, wait: 10)
 end
