@@ -2,7 +2,7 @@ class StringCalculatorsController < ApplicationController
   protect_from_forgery with: :null_session
 
   def create
-    input = params[:numbers].to_s
+    input = params[:numbers].to_s.gsub("\\n", "\n")
     result = StringCalculator.new.add(input)
     render json: { result: result }
   rescue NegativeNumbersError => e
