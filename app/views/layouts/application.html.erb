@@ -96,9 +96,7 @@
         }
 
         function validateInput(input) {
-          if (!input.trim()) {
-            return 'Please enter some numbers to calculate';
-          }
+          // Allow empty string as it should return 0
           return null;
         }
 
@@ -176,16 +174,16 @@
               },
                 React.createElement('button', { 
                   type: 'submit',
-                  disabled: isLoading || !input.trim(),
+                  disabled: isLoading,
                   style: { 
-                    backgroundColor: isLoading || !input.trim() ? '#95a5a6' : '#3498db',
+                    backgroundColor: isLoading ? '#95a5a6' : '#3498db',
                     color: 'white',
                     border: 'none',
                     padding: '12px 24px',
                     borderRadius: '8px',
                     fontSize: '16px',
                     fontWeight: '600',
-                    cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
                     transition: 'background-color 0.2s',
                     minWidth: '120px'
                   }
@@ -309,7 +307,7 @@
                   fontSize: '1.5rem',
                   fontWeight: 'bold'
                 } 
-              }, result)
+              }, `Result: ${result}`)
             ),
             
             error && React.createElement('div', { 
