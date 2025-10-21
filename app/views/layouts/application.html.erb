@@ -34,11 +34,22 @@
         const [input, setInput] = useState('');
         const [result, setResult] = useState(null);
         const [error, setError] = useState(null);
+        const [isLoading, setIsLoading] = useState(false);
+
+        const examples = [
+          { label: 'Basic', input: '1,2,3' },
+          { label: 'Newlines', input: '1\\n2,3' },
+          { label: 'Custom Delimiter', input: '//;\\n1;2' },
+          { label: 'Long Delimiter', input: '//[***]\\n1***2***3' },
+          { label: 'Multiple Delimiters', input: '//[*][%]\\n1*2%3' }
+        ];
 
         async function handleSubmit(e) {
           e.preventDefault();
           setResult(null);
           setError(null);
+          setIsLoading(true);
+          
           try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             const headers = {
@@ -60,28 +71,191 @@
             }
           } catch (error) {
             setError('Network error: ' + error.message);
+          } finally {
+            setIsLoading(false);
           }
         }
 
+        function handleExampleClick(exampleInput) {
+          setInput(exampleInput);
+          setResult(null);
+          setError(null);
+        }
+
         return (
-          React.createElement('div', { style: { maxWidth: '640px', margin: '40px auto', fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif' } },
-            React.createElement('h1', null, 'String Calculator'),
+          React.createElement('div', { 
+            style: { 
+              maxWidth: '800px', 
+              margin: '20px auto', 
+              padding: '20px',
+              fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '12px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            } 
+          },
+            React.createElement('div', { style: { textAlign: 'center', marginBottom: '30px' } },
+              React.createElement('h1', { 
+                style: { 
+                  color: '#2c3e50', 
+                  margin: '0 0 10px 0',
+                  fontSize: '2.5rem',
+                  fontWeight: '700'
+                } 
+              }, 'String Calculator'),
+              React.createElement('p', { 
+                style: { 
+                  color: '#7f8c8d', 
+                  margin: '0',
+                  fontSize: '1.1rem'
+                } 
+              }, 'Add numbers with various delimiters')
+            ),
+            
             React.createElement('form', { onSubmit: handleSubmit },
-              React.createElement('label', { htmlFor: 'numbers' }, 'Enter numbers string'),
-              React.createElement('textarea', {
-                id: 'numbers',
-                rows: 4,
-                style: { width: '100%', marginTop: '8px' },
-                value: input,
-                onChange: e => setInput(e.target.value),
-                placeholder: 'Examples: 1,2 or 1\\n2,3 or //[***]\\n1***2***3'
-              }),
-              React.createElement('div', { style: { marginTop: '12px' } },
-                React.createElement('button', { type: 'submit' }, 'Calculate')
+              React.createElement('div', { style: { marginBottom: '20px' } },
+                React.createElement('label', { 
+                  htmlFor: 'numbers',
+                  style: { 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: '600',
+                    color: '#34495e'
+                  } 
+                }, 'Enter numbers string'),
+                React.createElement('textarea', {
+                  id: 'numbers',
+                  rows: 4,
+                  style: { 
+                    width: '100%', 
+                    padding: '12px',
+                    border: '2px solid #e1e8ed',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontFamily: 'monospace',
+                    resize: 'vertical',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
+                  },
+                  value: input,
+                  onChange: e => setInput(e.target.value),
+                  placeholder: 'Examples: 1,2 or 1\\n2,3 or //[***]\\n1***2***3',
+                  onFocus: e => e.target.style.borderColor = '#3498db',
+                  onBlur: e => e.target.style.borderColor = '#e1e8ed'
+                })
+              ),
+              
+              React.createElement('div', { style: { marginBottom: '20px' } },
+                React.createElement('button', { 
+                  type: 'submit',
+                  disabled: isLoading,
+                  style: { 
+                    backgroundColor: isLoading ? '#95a5a6' : '#3498db',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s',
+                    minWidth: '120px'
+                  }
+                }, isLoading ? 'Calculating...' : 'Calculate')
               )
             ),
-            result !== null && React.createElement('p', { style: { color: 'green' } }, `Result: ${result}`),
-            error && React.createElement('p', { style: { color: 'crimson' } }, error)
+            
+            React.createElement('div', { style: { marginBottom: '20px' } },
+              React.createElement('h3', { 
+                style: { 
+                  color: '#2c3e50', 
+                  margin: '0 0 10px 0',
+                  fontSize: '1.2rem'
+                } 
+              }, 'Examples'),
+              React.createElement('div', { 
+                style: { 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  gap: '8px' 
+                } 
+              },
+                examples.map((example, index) =>
+                  React.createElement('button', {
+                    key: index,
+                    type: 'button',
+                    onClick: () => handleExampleClick(example.input),
+                    style: {
+                      backgroundColor: '#ecf0f1',
+                      color: '#2c3e50',
+                      border: '1px solid #bdc3c7',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    },
+                    onMouseOver: e => {
+                      e.target.style.backgroundColor = '#d5dbdb';
+                    },
+                    onMouseOut: e => {
+                      e.target.style.backgroundColor = '#ecf0f1';
+                    }
+                  }, `${example.label}: ${example.input}`)
+                )
+              )
+            ),
+            
+            result !== null && React.createElement('div', { 
+              style: { 
+                backgroundColor: '#d5f4e6',
+                border: '1px solid #27ae60',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '20px'
+              } 
+            },
+              React.createElement('h3', { 
+                style: { 
+                  color: '#27ae60', 
+                  margin: '0 0 8px 0',
+                  fontSize: '1.1rem'
+                } 
+              }, 'Result'),
+              React.createElement('p', { 
+                style: { 
+                  color: '#27ae60', 
+                  margin: '0',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold'
+                } 
+              }, result)
+            ),
+            
+            error && React.createElement('div', { 
+              style: { 
+                backgroundColor: '#fadbd8',
+                border: '1px solid #e74c3c',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '20px'
+              } 
+            },
+              React.createElement('h3', { 
+                style: { 
+                  color: '#e74c3c', 
+                  margin: '0 0 8px 0',
+                  fontSize: '1.1rem'
+                } 
+              }, 'Error'),
+              React.createElement('p', { 
+                style: { 
+                  color: '#e74c3c', 
+                  margin: '0',
+                  fontSize: '1rem'
+                } 
+              }, error)
+            )
           )
         );
       }
