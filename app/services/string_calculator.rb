@@ -12,7 +12,6 @@ class StringCalculator
 
   def add(numbers)
     return 0 if numbers == ""
-    
     # Handle single number case - must check if it's > 1000
     if numbers !~ DEFAULT_DELIMITERS && !numbers.start_with?("//")
       single_number = numbers.to_i
