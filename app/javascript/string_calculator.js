@@ -1,0 +1,392 @@
+import React, { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+
+function App() {
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const examples = [
+    { label: 'Basic', input: '1,2,3' },
+    { label: 'Newlines', input: '1\\n2,3' },
+    { label: 'Custom Delimiter', input: '//;\\n1;2' },
+    { label: 'Long Delimiter', input: '//[***]\\n1***2***3' },
+    { label: 'Multiple Delimiters', input: '//[*][%]\\n1*2%3' }
+  ];
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setResult(null);
+    setError(null);
+    
+    const validationError = validateInput(input);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]');
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      if (csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken.getAttribute('content');
+      }
+      const res = await fetch('/string_calculators', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ numbers: input })
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setResult(json.result);
+      } else {
+        setError(json.error || 'Error');
+      }
+    } catch (error) {
+      setError('Network error: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleExampleClick(exampleInput) {
+    setInput(exampleInput);
+    setResult(null);
+    setError(null);
+  }
+
+  function clearInput() {
+    setInput('');
+    setResult(null);
+    setError(null);
+  }
+
+  function validateInput(input) {
+    // Allow empty string as it should return 0
+    return null;
+  }
+
+  return React.createElement('div', { 
+    style: { 
+      maxWidth: '1200px', 
+      margin: '20px auto', 
+      padding: window.innerWidth < 768 ? '15px' : '20px',
+      fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+      backgroundColor: '#f8f9fa',
+      borderRadius: '12px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      minHeight: '100vh'
+    }
+  },
+    React.createElement('div', { style: { textAlign: 'center', marginBottom: '30px' } },
+      React.createElement('h1', { 
+        style: { 
+          color: '#2c3e50', 
+          margin: '0 0 10px 0',
+          fontSize: window.innerWidth < 768 ? '2rem' : '2.5rem',
+          fontWeight: '700'
+        }
+      }, 'String Calculator'),
+      React.createElement('p', { 
+        style: { 
+          color: '#7f8c8d', 
+          margin: '0',
+          fontSize: '1.1rem'
+        }
+      }, 'Add numbers with various delimiters')
+    ),
+    
+    React.createElement('div', { 
+      style: { 
+        display: 'flex', 
+        flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+        gap: '30px',
+        marginBottom: '20px'
+      }
+    },
+      // Input Section
+      React.createElement('div', { 
+        style: { 
+          flex: '1',
+          minWidth: window.innerWidth < 768 ? 'auto' : '300px'
+        }
+      },
+        React.createElement('h3', { 
+          style: { 
+            color: '#2c3e50', 
+            margin: '0 0 15px 0',
+            fontSize: '1.3rem',
+            fontWeight: '600'
+          }
+        }, 'Enter numbers string'),
+        React.createElement('form', { onSubmit: handleSubmit },
+          React.createElement('div', { style: { marginBottom: '20px' } },
+            React.createElement('textarea', {
+              id: 'numbers',
+              rows: 6,
+              style: { 
+                width: '100%', 
+                padding: '12px',
+                border: '2px solid #e1e8ed',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontFamily: 'monospace',
+                resize: 'vertical',
+                outline: 'none',
+                transition: 'border-color 0.2s',
+                minHeight: '120px'
+              },
+              value: input,
+              onChange: e => setInput(e.target.value),
+              placeholder: 'Examples: 1,2 or 1\\n2,3 or //[***]\\n1***2***3',
+              onFocus: e => e.target.style.borderColor = '#3498db',
+              onBlur: e => e.target.style.borderColor = '#e1e8ed'
+            })
+          ),
+          
+          React.createElement('div', { 
+            style: { 
+              display: 'flex', 
+              flexDirection: window.innerWidth < 480 ? 'column' : 'row',
+              gap: '12px', 
+              marginBottom: '20px' 
+            }
+          },
+            React.createElement('button', { 
+              type: 'submit',
+              disabled: isLoading,
+              style: { 
+                backgroundColor: isLoading ? '#95a5a6' : '#3498db',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.2s',
+                minWidth: '120px'
+              }
+            }, isLoading ? 'Calculating...' : 'Calculate'),
+            React.createElement('button', { 
+              type: 'button',
+              onClick: clearInput,
+              disabled: isLoading,
+              style: { 
+                backgroundColor: '#e74c3c',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.2s',
+                minWidth: '80px'
+              }
+            }, 'Clear')
+          )
+        )
+      ),
+      
+      // Result Section
+      React.createElement('div', { 
+        style: { 
+          flex: '1',
+          minWidth: window.innerWidth < 768 ? 'auto' : '300px'
+        }
+      },
+        React.createElement('h3', { 
+          style: { 
+            color: '#2c3e50', 
+            margin: '0 0 15px 0',
+            fontSize: '1.3rem',
+            fontWeight: '600'
+          }
+        }, 'Result'),
+        
+        React.createElement('div', { 
+          style: { 
+            border: '2px solid #e1e8ed',
+            borderRadius: '8px',
+            padding: '12px',
+            minHeight: '120px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#ffffff'
+          }
+        },
+          result !== null && React.createElement('div', { 
+            style: { 
+              textAlign: 'center',
+              width: '100%'
+            }
+          },
+            React.createElement('div', { 
+              style: { 
+                fontSize: '2.5rem',
+                fontWeight: 'bold',
+                color: '#27ae60',
+                marginBottom: '8px'
+              }
+            }, `Result: ${result}`),
+            React.createElement('p', { 
+              style: { 
+                color: '#27ae60', 
+                margin: '0',
+                fontSize: '1rem'
+              }
+            }, 'Calculation Complete')
+          ),
+          
+          error && React.createElement('div', { 
+            style: { 
+              width: '100%'
+            }
+          },
+            React.createElement('div', { 
+              style: { 
+                display: 'flex', 
+                alignItems: 'center',
+                marginBottom: '12px'
+              }
+            },
+              React.createElement('span', { 
+                style: { 
+                  fontSize: '24px',
+                  marginRight: '10px'
+                }
+              }, '⚠️'),
+              React.createElement('h4', { 
+                style: { 
+                  color: '#e74c3c', 
+                  margin: '0',
+                  fontSize: '1.1rem'
+                }
+              }, 'Error')
+            ),
+            React.createElement('p', { 
+              style: { 
+                color: '#e74c3c', 
+                margin: '0 0 12px 0',
+                fontSize: '1rem',
+                lineHeight: '1.4'
+              }
+            }, error),
+            error.includes('negative numbers not allowed') && React.createElement('div', { 
+              style: { 
+                padding: '10px',
+                backgroundColor: '#f8d7da',
+                borderRadius: '6px',
+                fontSize: '14px',
+                color: '#721c24',
+                border: '1px solid #f5c6cb'
+              }
+            }, '💡 Tip: Remove negative numbers from your input to calculate the sum.')
+          ),
+          
+          !result && !error && React.createElement('div', { 
+            style: { 
+              textAlign: 'center',
+              color: '#6c757d'
+            }
+          },
+            React.createElement('div', { 
+              style: { 
+                fontSize: '3rem',
+                marginBottom: '10px'
+              }
+            }, '🧮')
+          )
+        )
+      )
+    ),
+    
+    React.createElement('div', { style: { marginBottom: '20px' } },
+      React.createElement('h3', { 
+        style: { 
+          color: '#2c3e50', 
+          margin: '0 0 10px 0',
+          fontSize: '1.2rem'
+        }
+      }, 'Examples'),
+      React.createElement('div', { 
+        style: { 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '8px',
+          marginBottom: '15px',
+          justifyContent: window.innerWidth < 768 ? 'center' : 'flex-start'
+        }
+      },
+        examples.map((example, index) =>
+          React.createElement('button', {
+            key: index,
+            type: 'button',
+            onClick: () => handleExampleClick(example.input),
+            style: {
+              backgroundColor: '#ecf0f1',
+              color: '#2c3e50',
+              border: '1px solid #bdc3c7',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            },
+            onMouseOver: e => {
+              e.target.style.backgroundColor = '#d5dbdb';
+            },
+            onMouseOut: e => {
+              e.target.style.backgroundColor = '#ecf0f1';
+            }
+          }, `${example.label}: ${example.input}`)
+        )
+      ),
+      React.createElement('div', { 
+        style: { 
+          backgroundColor: '#f8f9fa',
+          border: '1px solid #e9ecef',
+          borderRadius: '8px',
+          padding: '16px',
+          fontSize: '14px',
+          color: '#495057'
+        }
+      },
+        React.createElement('h4', { 
+          style: { 
+            margin: '0 0 10px 0',
+            color: '#2c3e50',
+            fontSize: '16px'
+          }
+        }, 'Supported Formats:'),
+        React.createElement('ul', { 
+          style: { 
+            margin: '0',
+            paddingLeft: '20px'
+          }
+        },
+          React.createElement('li', null, 'Basic: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '1,2,3')),
+          React.createElement('li', null, 'Newlines: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '1\\n2,3')),
+          React.createElement('li', null, 'Custom delimiter: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '//;\\n1;2')),
+          React.createElement('li', null, 'Long delimiter: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '//[***]\\n1***2***3')),
+          React.createElement('li', null, 'Multiple delimiters: ', React.createElement('code', { style: { backgroundColor: '#e9ecef', padding: '2px 4px', borderRadius: '3px' } }, '//[*][%]\\n1*2%3')),
+          React.createElement('li', null, 'Empty string returns 0'),
+          React.createElement('li', null, 'Numbers > 1000 are ignored'),
+          React.createElement('li', null, 'Negative numbers show error with all negatives listed')
+        )
+      )
+    )
+  );
+}
+
+// Initialize the React app
+const root = createRoot(document.getElementById('root'));
+root.render(React.createElement(App));

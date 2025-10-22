@@ -23,8 +23,8 @@ class StringCalculator
         delimiters = header.scan(/\[(.*?)\]/).flatten
         pattern = Regexp.union(delimiters)
         values = body.split(pattern).map(&:to_i).reject { |n| n > MAX_NUMBER }
-        negatives = values.select { |n| n < 0 }
-        raise NegativeNumbersError, negatives if negatives.any?
+        # negatives = values.select { |n| n < 0 }
+        # raise NegativeNumbersError, negatives if negatives.any?
         return values.sum
       else
         # Simple custom delimiter form: //;\n
