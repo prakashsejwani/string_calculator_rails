@@ -12,7 +12,12 @@ class StringCalculator
 
   def add(numbers)
     return 0 if numbers == ""
-    return numbers.to_i if numbers !~ DEFAULT_DELIMITERS && !numbers.start_with?("//")
+    
+    # Handle single number case - must check if it's > 1000
+    if numbers !~ DEFAULT_DELIMITERS && !numbers.start_with?("//")
+      single_number = numbers.to_i
+      return single_number > MAX_NUMBER ? 0 : single_number
+    end
 
     if numbers.start_with?("//")
       header, body = numbers.split("\n", 2)
@@ -23,8 +28,8 @@ class StringCalculator
         delimiters = header.scan(/\[(.*?)\]/).flatten
         pattern = Regexp.union(delimiters)
         values = body.split(pattern).map(&:to_i).reject { |n| n > MAX_NUMBER }
-        # negatives = values.select { |n| n < 0 }
-        # raise NegativeNumbersError, negatives if negatives.any?
+        negatives = values.select { |n| n < 0 }
+        raise NegativeNumbersError, negatives if negatives.any?
         return values.sum
       else
         # Simple custom delimiter form: //;\n

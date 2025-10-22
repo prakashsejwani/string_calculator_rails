@@ -56,6 +56,11 @@ Feature: String Calculator UI
     And I click "Calculate"
     Then I should see "Result: 2"
 
+  Scenario: Single number greater than 1000 returns 0
+    When I enter "1001" in the calculator
+    And I click "Calculate"
+    Then I should see "Result: 0"
+
   Scenario: Negative numbers show error with all negatives listed
     When I enter "1,-2,3,-4" in the calculator
     And I click "Calculate"
